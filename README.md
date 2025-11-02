@@ -408,28 +408,6 @@ axios.post('http://localhost:8080/api/environments', {
 });
 ```
 
-## 📚 Documentation
-
-- [📖 Administrator Guide](docs/admin-guide.md)
-- [👨‍🎓 Student Guide](docs/user-guide.md)
-- [👨‍🏫 Instructor Guide](docs/instructor-guide.md)
-- [🔌 API Documentation](docs/api-docs.md)
-- [🛠️ Troubleshooting](docs/troubleshooting.md)
-- [❓ FAQ](docs/faq.md)
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Here's how you can help:
-
-### Ways to Contribute
-
-- 🐛 Report bugs and issues
-- 💡 Suggest new features
-- 📝 Improve documentation
-- 🔧 Submit pull requests
-- 🌍 Translate to other languages
-- ⭐ Star the repository
-
 ### Development Setup
 
 ```bash
@@ -506,13 +484,6 @@ npm run test:coverage
 - Research laboratories
 - Development workshops
 
-## 🌍 Impact
-
-SikhshaBox has been deployed in:
-- 🏫 50+ educational institutions
-- 👨‍🎓 10,000+ students served
-- 💰 $2M+ saved in infrastructure costs
-- 🌱 60% reduction in power consumption
 
 ## 📄 License
 
@@ -532,14 +503,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Special thanks to educators who provided valuable feedback
 - Powered by Docker, LXC, and other amazing open-source projects
 
-## 📞 Support
-
-Need help? We're here for you!
-
-- 📧 Email: support@sikhshabox.org
-- 💬 Discord: [Join our community](https://discord.gg/sikhshabox)
-- 🐛 Issues: [GitHub Issues](https://github.com/AMAN6921/SikhshaBox-Lightweight-OS-Virtualization-For-Affordable-Education-Labs/issues)
-- 📖 Wiki: [Documentation Wiki](https://github.com/AMAN6921/SikhshaBox-Lightweight-OS-Virtualization-For-Affordable-Education-Labs/wiki)
 
 ## 🌟 Star History
 
