@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #667eea);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+        }
+        .dashboard-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .dashboard-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(102, 126, 234, 0.3);
+        }
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .student-name {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .student-name i {
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .container-id {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1);
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .terminal-section {
+            padding: 30px;
+        }
+        .terminal-header {
+            background: #2d3748;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        .terminal-controls {
+            display: flex;
+            gap: 8px;
+        }
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .terminal-dot:hover {
+            transform: scale(1.5);
+            box-shadow: 0 0 10px currentColor;
+        }
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27c93f; }
+        .terminal-frame {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 0 0 10px 10px;
+            background: #000;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .status-running {
+            background: #27c93f;
+            color: white;
+        }
+        .status-stopped {
+            background: #ff5f56;
+            color: white;
+        }
+        .tools-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .tool-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .tool-badge:hover {
+            background: rgba(255,255,255,0.4);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+        .progress-bar-animated {
+            animation: progress-animation 1s ease-in-out infinite;
+        }
+        @keyframes progress-animation {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .progress {
+            overflow: visible;
+        }
+        
+        .progress-bar {
+            transition: width 0.6s ease;
+        }
+        .info-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: 100%;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out;
+            border: 2px solid transparent;
+        }
+        
+        .info-panel:hover {
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            transform: translateY(-3px);
+        }
+        .info-title {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            transition: color 0.3s ease;
+        }
+        
+        .info-title i {
+            transition: transform 0.3s ease;
+        }
+        
+        .info-panel:hover .info-title {
+            color: #764ba2;
+        }
+        
+        .info-panel:hover .info-title i {
+            transform: rotate(360deg);
+        }
+        .info-table {
+            width: 100%;
+            font-size: 0.95rem;
+        }
+        .info-table td {
+            padding: 8px 0;
+            vertical-align: top;
+        }
+        .info-table td:first-child {
+            color: #6c757d;
+            width: 50%;
+        }
+        .info-table td:last-child {
+            color: #2d3748;
+            font-weight: 500;
+        }
+        .packages-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .package-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .package-badge:hover {
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.5);
+        }
+        
+        .package-badge i {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .package-badge:hover i {
+            transform: rotate(360deg);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-4">
+        <div id="noContainer" class="alert alert-warning text-center" style="display: none;">
+            <h4><i class="bi bi-exclamation-triangle"></i> No Container Assigned</h4>
+            <p>Please wait for your teacher to assign you a container.</p>
+        </div>
+
+        <div id="containerInfo" class="dashboard-container" style="display: none;">
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="student-name" id="studentName">
+                    <i class="bi bi-person-circle"></i> <span id="studentNameText">Student</span>
+                </div>
+                <div class="container-id">
+                    Container ID: <strong id="containerId">—</strong>
+                </div>
+                <div class="mt-3">
+                    <span class="status-badge" id="statusBadge">—</span>
+                </div>
+                <div class="tools-list" id="toolsList"></div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-cpu" style="color: #667eea;"></i>
+                    </div>
+                    <div class="stat-label">CPU Usage</div>
+                    <div class="stat-value" id="cpuUsage">—</div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" id="cpuProgress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-memory" style="color: #764ba2;"></i>
+                    </div>
+                    <div class="stat-label">Memory Usage</div>
+                    <div class="stat-value" id="memUsage">—</div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-purple" id="memProgress" style="width: 0%; background: #764ba2;"></div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-hdd" style="color: #f093fb;"></i>
+                    </div>
+                    <div class="stat-label">CPU Cores</div>
+                    <div class="stat-value" id="cpuCores">—</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-speedometer2" style="color: #4facfe;"></i>
+                    </div>
+                    <div class="stat-label">Memory Limit</div>
+                    <div class="stat-value" id="memLimit">—</div>
+                </div>
+            </div>
+
+            <!-- Container Information Panel -->
+            <div style="padding: 30px; padding-bottom: 0;">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="info-panel">
+                            <h6 class="info-title"><i class="bi bi-info-circle"></i> Container Information</h6>
+                            <table class="info-table">
+                                <tr>
+                                    <td><strong>Student Name:</strong></td>
+                                    <td id="infoStudentName">—</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Container ID:</strong></td>
+                                    <td id="infoContainerId">—</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Image:</strong></td>
+                                    <td id="infoImage">—</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td><span id="infoStatus" class="badge bg-success">—</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-panel">
+                            <h6 class="info-title"><i class="bi bi-gear"></i> Resource Allocation</h6>
+                            <table class="info-table">
+                                <tr>
+                                    <td><strong>CPU Cores Assigned:</strong></td>
+                                    <td id="infoCpuCores">—</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Memory Limit:</strong></td>
+                                    <td id="infoMemLimit">—</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Controller/Teacher:</strong></td>
+                                    <td id="infoController">System Administrator</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Created:</strong></td>
+                                    <td id="infoCreated">—</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Installed Packages Panel -->
+                <div class="info-panel mt-3">
+                    <h6 class="info-title"><i class="bi bi-box-seam"></i> Installed Packages & Tools</h6>
+                    <div id="installedPackages" class="packages-grid">
+                        <span class="package-badge">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Section -->
+            <div class="terminal-section">
+                <div class="terminal-header">
+                    <div class="terminal-controls">
+                        <div class="terminal-dot dot-red"></div>
+                        <div class="terminal-dot dot-yellow"></div>
+                        <div class="terminal-dot dot-green"></div>
+                    </div>
+                    <div>
+                        <i class="bi bi-terminal"></i> Terminal - <span id="terminalTitle">Loading...</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-light" onclick="openTerminalNewTab()" id="openTerminalBtn" style="display: none;">
+                            <i class="bi bi-box-arrow-up-right"></i> Open in New Tab
+                        </button>
+                    </div>
+                </div>
+                <div style="position: relative;">
+                    <iframe id="terminalFrame" class="terminal-frame" src="" 
+                        onload="handleTerminalLoad()"
+                        onerror="handleTerminalError()"></iframe>
+                    <div id="terminalOverlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); border-radius: 0 0 10px 10px; display: flex; align-items: center; justify-content: center; flex-direction: column; color: white;">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px; color: #ffc107;"></i>
+                        <h4>Terminal Cannot Load in Iframe</h4>
+                        <p style="opacity: 0.8; margin-bottom: 30px;">Your browser is blocking the embedded terminal</p>
+                        <button class="btn btn-primary btn-lg" onclick="openTerminalNewTab()">
+                            <i class="bi bi-box-arrow-up-right"></i> Open Terminal in New Tab
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let myContainer = null;
+        let containerDetails = null;
+
+        async function fetchMyContainer() {
+            try {
+                const res = await axios.get('/containers');
+                const containers = res.data;
+                
+                // Get student ID from URL parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const studentId = urlParams.get('student') || '1';
+                
+                // Find container assigned to this student (flexible matching)
+                myContainer = containers.find(c => 
+                    c.name.includes(studentId) || 
+                    c.name.includes(`student_${studentId}`) ||
+                    c.name === studentId
+                ) || containers[0];
+                
+                if (myContainer) {
+                    document.getElementById('noContainer').style.display = 'none';
+                    document.getElementById('containerInfo').style.display = 'block';
+                    
+                    // Extract student name from container name
+                    const studentName = myContainer.name.replace(/_/g, ' ').split(' ').map(w => 
+                        w.charAt(0).toUpperCase() + w.slice(1)
+                    ).join(' ');
+                    
+                    document.getElementById('studentNameText').textContent = studentName;
+                    document.getElementById('containerId').textContent = myContainer.id;
+                    document.getElementById('terminalTitle').textContent = myContainer.name;
+                    
+                    // Update status badge
+                    const statusBadge = document.getElementById('statusBadge');
+                    statusBadge.textContent = myContainer.status.toUpperCase();
+                    statusBadge.className = 'status-badge ' + 
+                        (myContainer.status === 'running' ? 'status-running' : 'status-stopped');
+                    
+                    // Fetch detailed container info (which includes the actual port)
+                    fetchContainerDetails();
+                } else {
+                    document.getElementById('noContainer').style.display = 'block';
+                    document.getElementById('containerInfo').style.display = 'none';
+                }
+            } catch (err) {
+                console.error("Error fetching container:", err);
+            }
+        }
+
+        async function fetchContainerDetails() {
+            if (!myContainer) return;
+            
+            try {
+                const res = await axios.get(`/container_details/${myContainer.id}`);
+                containerDetails = res.data;
+                
+                if (containerDetails.success) {
+                    // Update resource limits in stats cards
+                    document.getElementById('cpuCores').textContent = containerDetails.cpu_cores || '—';
+                    document.getElementById('memLimit').textContent = 
+                        containerDetails.memory_limit ? `${containerDetails.memory_limit} MB` : '—';
+                    
+                    // Update tools list in header
+                    const toolsList = document.getElementById('toolsList');
+                    if (containerDetails.tools && containerDetails.tools.length > 0) {
+                        toolsList.innerHTML = containerDetails.tools.map(tool => 
+                            `<span class="tool-badge"><i class="bi bi-check-circle"></i> ${tool.toUpperCase()}</span>`
+                        ).join('');
+                    }
+                    
+                    // Update information panel
+                    const studentName = myContainer.name.replace(/_/g, ' ').split(' ').map(w => 
+                        w.charAt(0).toUpperCase() + w.slice(1)
+                    ).join(' ');
+                    
+                    document.getElementById('infoStudentName').textContent = studentName;
+                    document.getElementById('infoContainerId').textContent = myContainer.id;
+                    document.getElementById('infoImage').textContent = containerDetails.image || 'wettyoss/wetty';
+                    document.getElementById('infoStatus').textContent = myContainer.status.toUpperCase();
+                    document.getElementById('infoStatus').className = 'badge ' + 
+                        (myContainer.status === 'running' ? 'bg-success' : 'bg-danger');
+                    
+                    document.getElementById('infoCpuCores').textContent = containerDetails.cpu_cores || 'Unlimited';
+                    document.getElementById('infoMemLimit').textContent = 
+                        containerDetails.memory_limit ? `${containerDetails.memory_limit} MB` : 'Unlimited';
+                    
+                    // Format created date
+                    if (containerDetails.created) {
+                        const date = new Date(containerDetails.created);
+                        document.getElementById('infoCreated').textContent = date.toLocaleString();
+                    }
+                    
+                    // Set terminal URL to our custom terminal
+                    const terminalFrame = document.getElementById('terminalFrame');
+                    terminalUrl = `http://localhost:5000/terminal?container=${myContainer.id}`;
+                    if (terminalFrame.src !== terminalUrl) {
+                        terminalFrame.src = terminalUrl;
+                        console.log('Terminal URL set to:', terminalUrl);
+                        
+                        // Show the "Open in New Tab" button
+                        document.getElementById('openTerminalBtn').style.display = 'inline-block';
+                        
+                        // Hide overlay after 2 seconds if iframe loads
+                        setTimeout(() => {
+                            document.getElementById('terminalOverlay').style.display = 'none';
+                        }, 2000);
+                    }
+                    
+                    // Update installed packages panel with icons
+                    const packagesPanel = document.getElementById('installedPackages');
+                    if (containerDetails.tools && containerDetails.tools.length > 0) {
+                        const packageIcons = {
+                            'gcc': 'bi-file-code',
+                            'g++': 'bi-file-code',
+                            'python': 'bi-filetype-py',
+                            'nodejs': 'bi-filetype-js',
+                            'java': 'bi-filetype-java',
+                            'go': 'bi-code-square',
+                            'rust': 'bi-gear',
+                            'perl': 'bi-code',
+                            'make': 'bi-hammer',
+                            'cmake': 'bi-tools',
+                            'npm': 'bi-box',
+                            'pip': 'bi-box',
+                            'git': 'bi-git',
+                            'vim': 'bi-pencil-square',
+                            'nano': 'bi-pencil',
+                            'curl': 'bi-download',
+                            'wget': 'bi-download',
+                            'gdb': 'bi-bug',
+                            'valgrind': 'bi-shield-check'
+                        };
+                        
+                        packagesPanel.innerHTML = containerDetails.tools.map(tool => {
+                            const icon = packageIcons[tool.toLowerCase()] || 'bi-check-circle';
+                            return `<span class="package-badge"><i class="bi ${icon}"></i> ${tool.toUpperCase()}</span>`;
+                        }).join('');
+                    } else {
+                        packagesPanel.innerHTML = '<span class="package-badge"><i class="bi bi-info-circle"></i> No packages installed</span>';
+                    }
+                }
+            } catch (err) {
+                console.warn('Error fetching container details:', err);
+            }
+        }
+
+        async function updateMyStats() {
+            if (!myContainer) return;
+            
+            try {
+                const res = await axios.get(`/container_stats/${myContainer.id}`);
+                const data = res.data;
+                
+                if (data && data.success !== false) {
+                    const cpu = (data.cpu || 0).toFixed(1);
+                    const mem = (data.memory || 0).toFixed(1);
+                    
+                    document.getElementById('cpuUsage').textContent = cpu + '%';
+                    document.getElementById('memUsage').textContent = mem + ' MB';
+                    
+                    // Update progress bars
+                    document.getElementById('cpuProgress').style.width = Math.min(cpu, 100) + '%';
+                    
+                    if (containerDetails && containerDetails.memory_limit) {
+                        const memPercent = (mem / containerDetails.memory_limit) * 100;
+                        document.getElementById('memProgress').style.width = Math.min(memPercent, 100) + '%';
+                    }
+                }
+            } catch (err) {
+                console.warn('Error fetching stats:', err.message);
+            }
+        }
+
+        let terminalUrl = '';
+        
+        function openTerminalNewTab() {
+            if (terminalUrl) {
+                window.open(terminalUrl, '_blank', 'width=1200,height=800');
+            }
+        }
+        
+        function handleTerminalLoad() {
+            console.log('Terminal iframe loaded successfully');
+            document.getElementById('terminalOverlay').style.display = 'none';
+        }
+        
+        function handleTerminalError() {
+            console.error('Terminal iframe failed to load');
+            document.getElementById('terminalOverlay').style.display = 'flex';
+        }
+
+        // Refresh container info and stats
+        setInterval(fetchMyContainer, 10000);
+        setInterval(updateMyStats, 2000);
+        
+        fetchMyContainer();
+        setTimeout(updateMyStats, 1000);
+        
+        // Check if iframe loaded after 3 seconds
+        setTimeout(() => {
+            const iframe = document.getElementById('terminalFrame');
+            try {
+                // If we can't access contentWindow, it might be blocked
+                if (!iframe.contentWindow.location.href || iframe.contentWindow.location.href === 'about:blank') {
+                    document.getElementById('terminalOverlay').style.display = 'flex';
+                }
+            } catch (e) {
+                // Cross-origin error is actually good - means it loaded
+                console.log('Terminal loaded (cross-origin access blocked - this is normal)');
+            }
+        }, 3000);
+    </script>
+
+</body>
+
+</html>

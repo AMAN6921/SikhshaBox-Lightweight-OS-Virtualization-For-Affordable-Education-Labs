@@ -1,0 +1,29 @@
+FROM wettyoss/wetty:latest
+
+USER root
+
+# Install build tools and programming languages
+RUN apk update && apk add --no-cache \
+    gcc \
+    g++ \
+    python3 \
+    python3-dev \
+    py3-pip \
+    make \
+    cmake \
+    git \
+    vim \
+    nano \
+    curl \
+    wget
+
+# Create a student user
+RUN adduser -D -s /bin/sh student && \
+    echo "student:student" | chpasswd
+
+# Set working directory
+WORKDIR /home/student
+
+USER node
+
+EXPOSE 3000

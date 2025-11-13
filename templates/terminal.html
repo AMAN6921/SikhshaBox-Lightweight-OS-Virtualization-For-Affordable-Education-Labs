@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Terminal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            overflow: hidden;
+        }
+        #terminal {
+            width: 100vw;
+            height: 100vh;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="terminal"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const containerId = new URLSearchParams(window.location.search).get('container');
+        
+        const term = new Terminal({
+            cursorBlink: true,
+            fontSize: 14,
+            fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+            theme: {
+                background: '#1e1e1e',
+                foreground: '#d4d4d4',
+                cursor: '#d4d4d4',
+                black: '#000000',
+                red: '#cd3131',
+                green: '#0dbc79',
+                yellow: '#e5e510',
+                blue: '#2472c8',
+                magenta: '#bc3fbc',
+                cyan: '#11a8cd',
+                white: '#e5e5e5',
+                brightBlack: '#666666',
+                brightRed: '#f14c4c',
+                brightGreen: '#23d18b',
+                brightYellow: '#f5f543',
+                brightBlue: '#3b8eea',
+                brightMagenta: '#d670d6',
+                brightCyan: '#29b8db',
+                brightWhite: '#e5e5e5'
+            }
+        });
+        
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal'));
+        fitAddon.fit();
+        
+        window.addEventListener('resize', () => {
+            fitAddon.fit();
+        });
+        
+        const socket = io(`http://localhost:5000`);
+        
+        socket.on('connect', () => {
+            console.log('Connected to server');
+            socket.emit('start_terminal', { container_id: containerId });
+            term.writeln('\x1b[1;32mConnected to container terminal...\x1b[0m');
+        });
+        
+        socket.on('terminal_output', (data) => {
+            term.write(data);
+        });
+        
+        socket.on('disconnect', () => {
+            term.writeln('\r\n\x1b[1;31mDisconnected from server\x1b[0m');
+        });
+        
+        term.onData((data) => {
+            socket.emit('terminal_input', { container_id: containerId, data: data });
+        });
+    </script>
+</body>
+</html>

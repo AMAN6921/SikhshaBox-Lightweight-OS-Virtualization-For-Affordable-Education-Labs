@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #667eea);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .dashboard-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+            margin-bottom: 30px;
+            animation: fadeInUp 0.6s ease-out;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .dashboard-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            animation: float 3s ease-in-out infinite;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header-title i {
+            display: inline-block;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .header-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .create-container-card {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        .section-title {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #f093fb, transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        .section-title i {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        
+        .section-title:hover i {
+            transform: rotate(360deg);
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .tool-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .tool-section:hover {
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+        .tool-section h6 {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .form-check-label {
+            font-weight: 500;
+            transition: color 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .form-check-label:hover {
+            color: #667eea;
+        }
+        
+        .form-check-input {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .form-check-input:hover {
+            transform: scale(1.2);
+        }
+        
+        .form-control, .form-select {
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            transform: translateY(-2px);
+        }
+        .btn-create {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-create::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn-create:hover::before {
+            left: 100%;
+        }
+        
+        .btn-create:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn-create:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+        .containers-section {
+            padding: 30px;
+        }
+        .container-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .table {
+            margin-bottom: 0;
+        }
+        .table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .table thead th {
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+        }
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+        .table tbody tr {
+            transition: background 0.2s;
+        }
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        .btn-action {
+            margin: 2px;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .btn-action i {
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-action:hover i {
+            transform: scale(1.2);
+        }
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            animation: pulse 2s ease-in-out infinite;
+            transition: transform 0.2s ease;
+        }
+        
+        .status-badge:hover {
+            transform: scale(1.1);
+        }
+        .status-running {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-exited {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="header-section">
+                <div class="header-title">
+                    <i class="bi bi-person-workspace"></i> Teacher Dashboard
+                </div>
+                <div class="header-subtitle">
+                    Manage Student Containers & Resources
+                </div>
+            </div>
+            
+            <div class="create-container-card">
+                <h5 class="section-title">
+                    <i class="bi bi-plus-circle"></i> Create New Student Container
+                </h5>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Container Name</label>
+                    <input type="text" class="form-control" id="containerName" placeholder="student_1">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">CPU Cores</label>
+                    <select class="form-select" id="cpuCores">
+                        <option value="0.5">0.5 cores</option>
+                        <option value="1" selected>1 core</option>
+                        <option value="2">2 cores</option>
+                        <option value="4">4 cores</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Memory (MB)</label>
+                    <select class="form-select" id="memoryMB">
+                        <option value="256">256 MB</option>
+                        <option value="512" selected>512 MB</option>
+                        <option value="1024">1 GB</option>
+                        <option value="2048">2 GB</option>
+                        <option value="4096">4 GB</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label fw-bold">📦 Select Programming Tools & Languages to Install</label>
+                    
+                    <!-- Compilers & Interpreters -->
+                    <div class="tool-section">
+                        <h6><i class="bi bi-code-slash"></i> Compilers & Interpreters</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installGCC" checked>
+                                    <label class="form-check-label" for="installGCC">
+                                        <strong>GCC</strong> - C Compiler
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installGPP" checked>
+                                    <label class="form-check-label" for="installGPP">
+                                        <strong>G++</strong> - C++ Compiler
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installPython" checked>
+                                    <label class="form-check-label" for="installPython">
+                                        <strong>Python 3</strong> - Python Interpreter
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installNode">
+                                    <label class="form-check-label" for="installNode">
+                                        <strong>Node.js</strong> - JavaScript Runtime
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installJava">
+                                    <label class="form-check-label" for="installJava">
+                                        <strong>Java</strong> - OpenJDK
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installGo">
+                                    <label class="form-check-label" for="installGo">
+                                        <strong>Go</strong> - Go Language
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installRust">
+                                    <label class="form-check-label" for="installRust">
+                                        <strong>Rust</strong> - Rust Compiler
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installPerl">
+                                    <label class="form-check-label" for="installPerl">
+                                        <strong>Perl</strong> - Perl Interpreter
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Build Tools & Package Managers -->
+                    <div class="tool-section">
+                        <h6><i class="bi bi-tools"></i> Build Tools & Package Managers</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installMake">
+                                    <label class="form-check-label" for="installMake">
+                                        <strong>Make</strong> - Build Automation
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installCMake">
+                                    <label class="form-check-label" for="installCMake">
+                                        <strong>CMake</strong> - Cross-platform Build
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installNPM">
+                                    <label class="form-check-label" for="installNPM">
+                                        <strong>NPM</strong> - Node Package Manager
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installPip">
+                                    <label class="form-check-label" for="installPip">
+                                        <strong>Pip</strong> - Python Package Manager
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Development Tools -->
+                    <div class="tool-section">
+                        <h6><i class="bi bi-wrench"></i> Development Tools</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installGit">
+                                    <label class="form-check-label" for="installGit">
+                                        <strong>Git</strong> - Version Control
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installVim">
+                                    <label class="form-check-label" for="installVim">
+                                        <strong>Vim</strong> - Text Editor
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installNano">
+                                    <label class="form-check-label" for="installNano">
+                                        <strong>Nano</strong> - Text Editor
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installCurl">
+                                    <label class="form-check-label" for="installCurl">
+                                        <strong>Curl</strong> - HTTP Client
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installWget">
+                                    <label class="form-check-label" for="installWget">
+                                        <strong>Wget</strong> - File Downloader
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installGDB">
+                                    <label class="form-check-label" for="installGDB">
+                                        <strong>GDB</strong> - GNU Debugger
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="installValgrind">
+                                    <label class="form-check-label" for="installValgrind">
+                                        <strong>Valgrind</strong> - Memory Debugger
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-create" onclick="createContainer()">
+                            <i class="bi bi-plus-circle"></i> Create Container
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-container">
+            <div class="containers-section">
+                <h5 class="section-title">
+                    <i class="bi bi-grid-3x3"></i> Active Containers
+                </h5>
+                <div class="container-table">
+                    <table class="table text-center">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th>CPU%</th>
+                                <th>Memory (MB)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="containerTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function fetchContainers() {
+            try {
+                const res = await axios.get('/containers');
+                const containers = res.data;
+                const tbody = document.getElementById('containerTable');
+
+                // --- Update container rows dynamically ---
+                containers.forEach(c => {
+                    const existingRow = document.getElementById(`row_${c.id}`);
+                    const statusClass = c.status === 'running' ? 'status-running' : 'status-exited';
+                    const isRunning = c.status === 'running';
+                    const startStopBtn = isRunning 
+                        ? `<button class="btn btn-warning btn-action btn-sm" onclick="stopContainer('${c.id}')">
+                            <i class="bi bi-pause-circle"></i> Stop
+                           </button>`
+                        : `<button class="btn btn-success btn-action btn-sm" onclick="startContainer('${c.id}')">
+                            <i class="bi bi-play-circle"></i> Start
+                           </button>`;
+                    
+                    if (!existingRow) {
+                        // Add new row if it doesn't exist
+                        tbody.insertAdjacentHTML('beforeend', `
+                        <tr id="row_${c.id}">
+                            <td><code>${c.id}</code></td>
+                            <td><strong>${c.name}</strong></td>
+                            <td id="status_${c.id}"><span class="status-badge ${statusClass}">${c.status.toUpperCase()}</span></td>
+                            <td id="cpu_${c.id}"><span class="badge bg-info">—</span></td>
+                            <td id="mem_${c.id}"><span class="badge bg-secondary">—</span></td>
+                            <td id="actions_${c.id}">
+                                ${startStopBtn}
+                                <button class="btn btn-info btn-action btn-sm" onclick="restartContainer('${c.id}')">
+                                    <i class="bi bi-arrow-clockwise"></i> Restart
+                                </button>
+                                <button class="btn btn-danger btn-action btn-sm" onclick="removeContainer('${c.id}')">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                    } else {
+                        // Update existing row status and buttons
+                        const statusCell = document.getElementById(`status_${c.id}`);
+                        const actionsCell = document.getElementById(`actions_${c.id}`);
+                        
+                        if (statusCell) {
+                            statusCell.innerHTML = `<span class="status-badge ${statusClass}">${c.status.toUpperCase()}</span>`;
+                        }
+                        
+                        if (actionsCell) {
+                            actionsCell.innerHTML = `
+                                ${startStopBtn}
+                                <button class="btn btn-info btn-action btn-sm" onclick="restartContainer('${c.id}')">
+                                    <i class="bi bi-arrow-clockwise"></i> Restart
+                                </button>
+                                <button class="btn btn-danger btn-action btn-sm" onclick="removeContainer('${c.id}')">
+                                    <i class="bi bi-trash"></i> Remove
+                                </button>
+                            `;
+                        }
+                    }
+                });
+
+                // --- Remove rows for containers that no longer exist ---
+                const existingRows = Array.from(document.querySelectorAll("tbody tr"));
+                existingRows.forEach(row => {
+                    const id = row.id.replace("row_", "");
+                    if (!containers.find(c => c.id === id)) {
+                        row.remove();
+                    }
+                });
+            } catch (err) {
+                console.error("Error fetching containers:", err);
+            }
+        }
+
+        // --- New function: update CPU and Memory live ---
+        // --- New function: update CPU and Memory live ---
+        async function updateStats() {
+            const rows = document.querySelectorAll("tbody tr");
+            if (rows.length === 0) return; // no containers yet
+
+            for (const row of rows) {
+                const id = row.id.replace("row_", "");
+                try {
+                    const res = await axios.get(`/container_stats/${id}`);
+                    const data = res.data;
+                    if (data && data.success !== false) {
+                        const cpuCell = document.getElementById(`cpu_${id}`);
+                        const memCell = document.getElementById(`mem_${id}`);
+                        const cpu = (data.cpu || 0).toFixed(1);
+                        const mem = (data.memory || 0).toFixed(1);
+                        
+                        if (cpuCell) {
+                            const cpuColor = cpu > 80 ? 'bg-danger' : cpu > 50 ? 'bg-warning' : 'bg-info';
+                            cpuCell.innerHTML = `<span class="badge ${cpuColor}">${cpu}%</span>`;
+                        }
+                        if (memCell) {
+                            const memColor = mem > 400 ? 'bg-danger' : mem > 200 ? 'bg-warning' : 'bg-secondary';
+                            memCell.innerHTML = `<span class="badge ${memColor}">${mem} MB</span>`;
+                        }
+                    }
+                } catch (err) {
+                    console.warn(`Error fetching stats for ${id}:`, err.message);
+                }
+            }
+        }
+
+
+        async function createContainer() {
+            const name = document.getElementById('containerName').value;
+            const cpuCores = parseFloat(document.getElementById('cpuCores').value);
+            const memoryMB = parseInt(document.getElementById('memoryMB').value);
+            
+            // Get selected tools
+            const tools = [];
+            
+            // Compilers & Interpreters
+            if (document.getElementById('installGCC').checked) tools.push('gcc');
+            if (document.getElementById('installGPP').checked) tools.push('g++');
+            if (document.getElementById('installPython').checked) tools.push('python');
+            if (document.getElementById('installNode').checked) tools.push('nodejs');
+            if (document.getElementById('installJava').checked) tools.push('java');
+            if (document.getElementById('installGo').checked) tools.push('go');
+            if (document.getElementById('installRust').checked) tools.push('rust');
+            if (document.getElementById('installPerl').checked) tools.push('perl');
+            
+            // Build Tools
+            if (document.getElementById('installMake').checked) tools.push('make');
+            if (document.getElementById('installCMake').checked) tools.push('cmake');
+            if (document.getElementById('installNPM').checked) tools.push('npm');
+            if (document.getElementById('installPip').checked) tools.push('pip');
+            
+            // Development Tools
+            if (document.getElementById('installGit').checked) tools.push('git');
+            if (document.getElementById('installVim').checked) tools.push('vim');
+            if (document.getElementById('installNano').checked) tools.push('nano');
+            if (document.getElementById('installCurl').checked) tools.push('curl');
+            if (document.getElementById('installWget').checked) tools.push('wget');
+            if (document.getElementById('installGDB').checked) tools.push('gdb');
+            if (document.getElementById('installValgrind').checked) tools.push('valgrind');
+            
+            if (tools.length === 0) {
+                alert('⚠️ Please select at least one programming tool to install!');
+                return;
+            }
+            
+            const payload = {
+                cpu_cores: cpuCores,
+                memory_mb: memoryMB,
+                tools: tools
+            };
+            
+            if (name) {
+                payload.name = name;
+            }
+            
+            const res = await axios.post('/start_container', payload);
+            if (res.data.success) {
+                const toolsList = res.data.tools ? res.data.tools.join(', ') : 'none';
+                alert(`✅ Container created!\nName: ${res.data.name}\nTools: ${toolsList}\nCPU: ${res.data.cpu_cores} cores\nMemory: ${res.data.memory_mb} MB\nURL: ${res.data.url}`);
+                document.getElementById('containerName').value = '';
+            } else {
+                alert('❌ Error: ' + res.data.error);
+            }
+            fetchContainers();
+        }
+
+        async function stopContainer(id) {
+            try {
+                const res = await axios.post('/stop_container/' + id);
+                if (res.data.success) {
+                    alert('✅ Container stopped successfully!');
+                    fetchContainers(); // Refresh to show Start button
+                } else {
+                    alert('❌ Error: ' + res.data.error);
+                }
+            } catch (err) {
+                alert('❌ Error stopping container');
+            }
+        }
+
+        async function startContainer(id) {
+            try {
+                const res = await axios.post('/restart_container/' + id);
+                if (res.data.success) {
+                    alert('✅ Container started successfully!');
+                    fetchContainers(); // Refresh to show Stop button
+                } else {
+                    alert('❌ Error: ' + res.data.error);
+                }
+            } catch (err) {
+                alert('❌ Error starting container');
+            }
+        }
+
+        async function removeContainer(id) {
+            if (!confirm('⚠️ Are you sure you want to remove this container? This action cannot be undone.')) {
+                return;
+            }
+            try {
+                const res = await axios.delete('/remove_container/' + id);
+                if (res.data.success) {
+                    alert('✅ Container removed successfully!');
+                } else {
+                    alert('❌ Error: ' + res.data.error);
+                }
+            } catch (err) {
+                alert('❌ Error removing container');
+            }
+            fetchContainers();
+        }
+
+        async function restartContainer(id) {
+            try {
+                const res = await axios.post('/restart_container/' + id);
+                if (res.data.success) {
+                    alert('✅ ' + res.data.message);
+                } else {
+                    alert('❌ ' + res.data.error);
+                }
+            } catch (err) {
+                alert('❌ Error restarting container');
+            }
+            fetchContainers();
+        }
+
+        // --- Refresh rules ---
+        setInterval(fetchContainers, 5000); // updates container list (new/removals)
+        setInterval(updateStats, 2000);     // refresh CPU & Memory frequently
+
+        fetchContainers();
+        updateStats();
+    </script>
+
+</body>
+
+</html>
